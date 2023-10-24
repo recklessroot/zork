@@ -1,0 +1,97 @@
+ZORK
+
+    https://github.com/recklessroot/zork
+
+-------------------------------------------------------------------------------
+USAGE
+
+    python3 zork.py [-h] [-a AGENT] [-n NUM] [-z] [-d] [-j] [-o OUTFILE]
+                    [-s SITE] [-T ALLINTITLE | -t INTITLE] [-U ALLINURL | -u INURL]
+                    [-f FILETYPE] [-e EXT] [-x INTEXT] [-l LINK] [-r RELATED] [-q QUERY]
+
+-------------------------------------------------------------------------------
+DESCRIPTION
+
+    Zork is a flexible python script that allows you to quickly search on Google
+    using some powerful search parameters, commonly called 'dorks'.
+
+    Zork also includes a preconfigured list of dorks which can be conveniently selected with fzf (fuzzyfinder).
+
+    It can be tiresome to write the same parameters over and over again
+    so the single letters make your dorkin' experience easier.
+
+    Last but not least, Zork completely bypasses the very annoying and oh so frequent captchas.
+
+-------------------------------------------------------------------------------
+GOOD-TO-KNOW
+
+    - You can add your own dork list in 'fuzzy/'
+      Zork will automatically make a single list with every files in this directory and remove duplicates.
+
+    - You can reproduce queries like: '+intitle:somequery', '-intitle:somequery'
+      For this, add the sign as your first character.
+      If instead you want to search for a literal '+' as first character, use '\+'. (See Examples)
+
+    - By default Zork uses a random user-agent, but you can specify one with the -a flag.
+
+    - When using the -z flag (fuzzyfinder), the result will prepend any other flags.
+      Inversely, the -q flag (query) is always last.  ('FUZZY_CHOICE ... some dorks ... QUERY')
+
+    - Google may not like if you make too many queries... If you have a vpn, it's going to be quite useful!
+
+-------------------------------------------------------------------------------
+OPTIONS
+
+    SCRIPT:
+        -a, --agent             Use a custom user agent (default: random)
+        -d, --dry-run           Only print the query without sending it
+        -h, --help              Show this help message and exit
+        -j, --json              formats results in json
+        -n, --num               Number of results to retrieve (default: 10)
+        -o, --outfile           Save results in a file (if OUTFILE ends with '.json', --json is applied)
+        -z, --fuzzy             Select a pre-written query from the list with fuzzyfinder
+
+    SEARCH:
+        -e, --ext               Find an file extension
+        -f, --filetype          Find a filetype
+        -l, --link         *    Find websites that links to LINK
+        -q, --query        *    Custom query
+        -r, --related      *    Find websites similar to RELATED
+        -s, --site              FIND on SITE
+        -t, --intitle      *    Find in title
+        -T, --allintitle        Find every following words in the title
+        -u, --inurl        *    Find in url
+        -U, --allinurl          Find every following words in the url
+        -x, --intext       *    Find in website content
+
+    * : flag is reusable ( -x 'text1' -x 'text2')
+
+-------------------------------------------------------------------------------
+EXAMPLES
+
+    DISCLAIMER: These examples are only showing how to use Zork
+                They are not examples of good/efficient queries
+
+            To learn more about google dorking, try this command:
+
+            python3 zork.py -t '"dork"' -t "+(guide|tutorial)" -x '+"allinurl"'
+
+
+    # Searching for 5 results using Googlebot as user-agent
+    # containing [FUZZY_STRING] and includes both 'title1' and 'title2' in the title
+
+        python3 zork.py -z -n 5 -a 'Googlebot' -T '"title1" "title2"'
+
+        search query: FUZZY_STRING allintitle:"title1" "title2"
+
+    # Searching for 10 results using a random user-agent for 'txt' files, only on 'example.com'
+
+        python3 zork.py -e 'txt' -s 'example.com'
+
+        search query: site:example.com ext:txt
+
+    # Searching for a url containing 'wp' AND '-admin', but NOT '-includes', with a title include '-login'
+
+        python3 zork.py -u 'wp' -u '+-admin' -u '-"-includes"' -t '"\-login"'
+
+        search query: inurl:wp +inurl:-admin -inurl:"-includes" intitle:"-login"

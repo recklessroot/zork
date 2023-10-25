@@ -9,9 +9,9 @@ from os import listdir, path
 
 # $PWD
 SCRIPT_DIR = f'{path.dirname(__file__)}'
-
 FUZZY_DIR = f'{SCRIPT_DIR}/fuzzy/'
 HELP_FILE = f'{SCRIPT_DIR}/HELP.txt'
+
 
 def someHelpPlease():
     with open(HELP_FILE, 'r') as help_file:
@@ -21,23 +21,41 @@ def someHelpPlease():
 
 # dork selection with fzf
 def fuzzyFind():
+    if not pyfzf.which('fzf'):
+        print('WARNING: fzf not found. To use this option (-z/--fuzzy), please make sure fzf is installed and in your path.\n\tAlternatively, you can uncomment line 29 of zork.py and manually set its path')
+        exit(1)
+
+    ## Uncomment to manually set fzf binary path
+    # pyfzf.FzfPrompt().executable_path = '/usr/bin/fzf'
+
+    fzf_options = [
+        "--multi",
+        "--cycle",
+        "--header '=====================================================\nPress TAB to add/remove query. Press ENTER when done.\n====================================================='"
+    ]
+
     dork_lists = []
 
     # every file in FUZZY_DIR
     for file in listdir(FUZZY_DIR):
-        lst = open(FUZZY_DIR + file, 'r')
-        dork_lists = [*dork_lists, *lst.read().splitlines()]
-        lst.close()
+        with open(FUZZY_DIR + file, 'r') as f:
+            dork_lists = [*dork_lists, *f.read().splitlines()]
 
-    choice = pyfzf.FzfPrompt().prompt(set(dork_lists), '--multi --cycle')
+    pyfzf.FzfPrompt()
+    choice = pyfzf.FzfPrompt().prompt(sorted(set(dork_lists)), ' '.join(fzf_options))
     return ' '.join(choice)
 
 # google search
 def zorkin(query, userAgent, num, wait):
     results = []
-    for i in search(query, num=int(num), stop=int(num), pause=int(wait), user_agent=userAgent):
-        results.append(i)
+    try:
+        for i in search(query, num=int(num), stop=int(num), pause=int(wait), user_agent=userAgent):
+            results.append(i)
+    except:
+        print(f'ERROR: Search query failed. Try increasing the wait time (-w/--wait) and/or decreasing the number of results (-n/--num)\n\nCurrent wait time: {wait} seconds\nCurrent number of results: {num}')
+
     return results
+
 
 # command options
 def getOptions():
